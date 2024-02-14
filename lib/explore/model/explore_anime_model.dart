@@ -4,6 +4,7 @@ class ExploreAnimeModel {
   final String image;
   final int currentEpisode;
   final String type;
+  final String status;
 
   ExploreAnimeModel({
     required this.id,
@@ -11,6 +12,7 @@ class ExploreAnimeModel {
     required this.image,
     required this.currentEpisode,
     required this.type,
+    required this.status,
   });
 
   factory ExploreAnimeModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,7 @@ class ExploreAnimeModel {
           json['images']['jpg']['image_url'],
       currentEpisode: json['episodes'] ?? 0,
       type: json['type'],
+      status: json['status'] ?? "Unknown",
     );
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:project_f/detail/detail_controller.dart';
 import 'package:project_f/explore/model/explore_anime_model.dart';
 import 'package:project_f/explore/model/explore_genre_model.dart';
 import 'package:project_f/explore/services/explore_anime_service.dart';
@@ -171,13 +172,23 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                 itemCount: snapshot.data?.length ?? 0,
                                 itemBuilder: (BuildContext context, int index) {
                                   return LayoutBuilder(
-                                    builder: (context, constraints) => HomePoster(
-                                        title: snapshot.data[index].title,
-                                        image: snapshot.data[index].image,
-                                        id: snapshot.data[index].id.toString(),
-                                        subtitle:
-                                            '${snapshot.data[index].currentEpisode} Episodes',
-                                        width: constraints.maxWidth),
+                                    builder: (context, constraints) => InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(builder: (ctx) {
+                                          return DetailController(
+                                              id: snapshot.data[index].id);
+                                        }));
+                                      },
+                                      child: HomePoster(
+                                          title: snapshot.data[index].title,
+                                          image: snapshot.data[index].image,
+                                          id: snapshot.data[index].id
+                                              .toString(),
+                                          subtitle:
+                                              '${snapshot.data[index].currentEpisode} Episodes • ${snapshot.data[index].type}',
+                                          width: constraints.maxWidth),
+                                    ),
                                   );
                                 },
                               ),
