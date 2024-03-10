@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:project_f/detail/model/anime_detail_model.dart';
+import 'package:project_f/detail/model/anime_streaming_model.dart';
 import 'package:project_f/detail/services/anime_detail_service.dart';
 import 'package:project_f/detail/widgets/detail_app_bar.dart';
 import 'package:project_f/detail/widgets/detail_info.dart';
@@ -24,11 +25,22 @@ class _DetailScreenState extends State<DetailScreen> {
   bool _infoExpanded = false;
   final _maxSynopsisLines = 5;
   AnimeDetailService animeDetailService = AnimeDetailService();
+  List<AnimeStreamingModel> _streaming = [];
+
+  void getStreamingicon() async {
+    for (var i = 0; i < _streaming.length; i++) {
+      final String icon = await animeDetailService.getIcon(_streaming[i].url);
+      setState(() {
+        _streaming[i].icon = icon;
+      });
+    }
+  }
 
   void getAnimeDetail() async {
     AnimeDetailModel model = await animeDetailService.getAnimeDetail(widget.id);
     setState(() {
       _animeDetail = model;
+      _streaming = model.streaming;
     });
 
     //RATE LIMITING TO 5 ONLY
@@ -55,6 +67,14 @@ class _DetailScreenState extends State<DetailScreen> {
         }
       }
     }
+    //set timeout
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      animeDetailService.getAnimeCharacters(widget.id).then((value) {
+        setState(() {
+          _animeDetail!.characters = value;
+        });
+      });
+    });
   }
 
   @override
@@ -121,7 +141,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: Text(
                   _animeDetail!.synopsis,
                   maxLines: _infoExpanded ? 100 : _maxSynopsisLines,
@@ -170,7 +190,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               SizedBox(
-                height: 250,
+                height: 220,
                 child: ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
@@ -194,9 +214,9 @@ class _DetailScreenState extends State<DetailScreen> {
                     final entry = _animeDetail!
                         .relations[relationIndex].entry[entryIndex];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SizedBox(
-                        height: 250,
+                        height: 220,
                         child: entry.imageUrl.isEmpty
                             ? AspectRatio(
                                 aspectRatio: 2 / 3,
@@ -229,6 +249,67 @@ class _DetailScreenState extends State<DetailScreen> {
                   },
                 ),
               ),
+
+              const Padding(
+                padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 4),
+                child: Text(
+                  "Characters",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+              ),
+              SizedBox(
+                height: 220,
+                child: _animeDetail!.characters.isEmpty
+                    ? ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: AspectRatio(
+                              aspectRatio: 2 / 3,
+                              child: Skeletonizer(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[400],
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _animeDetail!.characters.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: AspectRatio(
+                              aspectRatio: 2 / 3,
+                              child: LayoutBuilder(
+                                builder: (BuildContext context,
+                                    BoxConstraints constraints) {
+                                  return HomePoster(
+                                    id: _animeDetail!.characters[index].id
+                                        .toString(),
+                                    image:
+                                        _animeDetail!.characters[index].image,
+                                    title: _animeDetail!.characters[index].name,
+                                    subtitle:
+                                        _animeDetail!.characters[index].role,
+                                    width: constraints.maxWidth,
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              )
             ])
           ],
         ),

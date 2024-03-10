@@ -37,8 +37,8 @@ class _HomeNavControllerState extends State<HomeNavController> {
             label: 'Explore',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(Icons.person),
+            label: 'User',
           ),
         ],
         currentIndex: _currentScreenIndex,
